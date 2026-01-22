@@ -1,49 +1,53 @@
-const summarizeBtn = document.getElementById("summarizeBtn");
-const notesInput = document.getElementById("notesInput");
-const summaryText = document.getElementById("summaryText");
-
-// ✅ Cloudflare Worker backend
-const BACKEND_URL = "https://cold-math-dadb.asishapanda6.workers.dev";
-
-summarizeBtn.addEventListener("click", async () => {
-  const notes = notesInput.value.trim();
-
-  if (!notes) {
-    summaryText.innerText = "Please paste some notes first.";
-    return;
-  }
-
-  summaryText.innerText = "⏳ Generating AI summary... Please wait (first time may take 30s)";
-
-  try {
-    const response = await fetch(BACKEND_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ text: notes })
-    });
-
-    const data = await response.json();
-
-    // 🔴 CASE: Hugging Face error
-    if (data.error) {
-      summaryText.innerText =
-        "⚠️ AI model is waking up. Please click again in 20–30 seconds.";
-      return;
+export default {
+  async fetch(request, env) {
+    // Allow only POST
+    if (request.method !== "POST") {
+      return new Response("Method Not Allowed", { status: 405 });
     }
 
-    // ✅ CASE: Correct response
-    if (Array.isArray(data) && data[0]?.summary_text) {
-      summaryText.innerText = data[0].summary_text;
-      return;
+    try {
+      const body = await request.json();
+      const text = body.text;
+
+      if (!text) {
+        return new Response(
+          JSON.stringify({ error: "No text provided" }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      const hfResponse = await fetch(
+        "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
+        {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${env.HF_TOKEN}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            inputs: text,
+            parameters: {
+              max_length: 150,
+              min_length: 60
+            }
+          })
+        }
+      );
+
+      const result = await hfResponse.json();
+
+      return new Response(JSON.stringify(result), {
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+        }
+      });
+
+    } catch (err) {
+      return new Response(
+        JSON.stringify({ error: "Worker error", details: err.message }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
     }
-
-    // ❌ Unknown case
-    summaryText.innerText = "⚠️ Unexpected AI response. Try again.";
-
-  } catch (err) {
-    summaryText.innerText = "❌ Server error. Please try again.";
-    console.error(err);
   }
-});
+};
