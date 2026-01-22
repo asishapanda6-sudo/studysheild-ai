@@ -1,4 +1,4 @@
-document.getElementById("summarizeBtn").addEventListener("click", () => {
+document.getElementById("summarizeBtn").addEventListener("click", async () => {
   const text = document.getElementById("notesInput").value.trim();
   const output = document.getElementById("summaryText");
 
@@ -7,20 +7,19 @@ document.getElementById("summarizeBtn").addEventListener("click", () => {
     return;
   }
 
-  output.innerText = "Summarizing...";
+  output.innerText = "AI is thinking...";
 
-  // Simple smart summary (no server, no error)
-  const sentences = text
-    .split(".")
-    .map(s => s.trim())
-    .filter(s => s.length > 0);
+  try {
+    const res = await fetch("https://YOUR-WORKER-URL.workers.dev", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
 
-  const summary = sentences
-    .slice(0, 4)
-    .map(s => "• " + s)
-    .join("\n");
+    const data = await res.json();
+    output.innerText = data.summary || "AI failed to respond.";
 
-  setTimeout(() => {
-    output.innerText = summary || "Could not generate summary.";
-  }, 500);
+  } catch (e) {
+    output.innerText = "Server error. Please try again.";
+  }
 });
