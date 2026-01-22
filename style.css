@@ -10,7 +10,7 @@ body {
 }
 
 .container {
-    max-width: 700px;
+    max-width: 600px;
     margin: 40px auto;
     background: #ffffff;
     padding: 30px;
@@ -31,25 +31,24 @@ h1 {
     font-size: 15px;
 }
 
-textarea {
+input {
     width: 100%;
-    height: 160px;
-    padding: 15px;
+    padding: 12px;
+    margin-bottom: 12px;
     font-size: 14px;
     border-radius: 8px;
     border: 1px solid #ccc;
-    resize: vertical;
     outline: none;
 }
 
-textarea:focus {
+input:focus {
     border-color: #4a90e2;
 }
 
 button {
-    margin-top: 15px;
     width: 100%;
     padding: 12px;
+    margin-top: 10px;
     background: #4a90e2;
     color: white;
     border: none;
@@ -75,7 +74,7 @@ button:hover {
     color: #2c3e50;
 }
 
-#summaryText {
+#resultText {
     color: #333;
     font-size: 14px;
     line-height: 1.6;
