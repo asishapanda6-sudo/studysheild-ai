@@ -2,7 +2,7 @@ const summarizeBtn = document.getElementById("summarizeBtn");
 const notesInput = document.getElementById("notesInput");
 const summaryText = document.getElementById("summaryText");
 
-// 🔴 Cloudflare Worker URL (AI Backend)
+// ✅ Cloudflare Worker backend
 const BACKEND_URL = "https://cold-math-dadb.asishapanda6.workers.dev";
 
 summarizeBtn.addEventListener("click", async () => {
@@ -13,7 +13,7 @@ summarizeBtn.addEventListener("click", async () => {
     return;
   }
 
-  summaryText.innerText = "⏳ Generating AI summary... Please wait.";
+  summaryText.innerText = "⏳ Generating AI summary... Please wait (first time may take 30s)";
 
   try {
     const response = await fetch(BACKEND_URL, {
@@ -26,16 +26,24 @@ summarizeBtn.addEventListener("click", async () => {
 
     const data = await response.json();
 
+    // 🔴 CASE: Hugging Face error
     if (data.error) {
-      summaryText.innerText = "⚠️ AI error. Try again.";
+      summaryText.innerText =
+        "⚠️ AI model is waking up. Please click again in 20–30 seconds.";
       return;
     }
 
-    summaryText.innerText =
-      data[0]?.summary_text || "⚠️ No summary generated.";
+    // ✅ CASE: Correct response
+    if (Array.isArray(data) && data[0]?.summary_text) {
+      summaryText.innerText = data[0].summary_text;
+      return;
+    }
 
-  } catch (error) {
-    summaryText.innerText = "❌ Server error. Please try later.";
-    console.error(error);
+    // ❌ Unknown case
+    summaryText.innerText = "⚠️ Unexpected AI response. Try again.";
+
+  } catch (err) {
+    summaryText.innerText = "❌ Server error. Please try again.";
+    console.error(err);
   }
 });
