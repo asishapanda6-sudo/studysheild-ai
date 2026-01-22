@@ -1,52 +1,49 @@
-const checkBtn = document.getElementById("checkBtn");
-const subjectInput = document.getElementById("subjectInput");
-const totalClassesInput = document.getElementById("totalClasses");
-const attendedClassesInput = document.getElementById("attendedClasses");
-const resultText = document.getElementById("resultText");
+const summarizeBtn = document.getElementById("summarizeBtn");
+const notesInput = document.getElementById("notesInput");
+const summaryText = document.getElementById("summaryText");
 
-checkBtn.addEventListener("click", function () {
-    const subject = subjectInput.value.trim();
-    const total = parseInt(totalClassesInput.value);
-    const attended = parseInt(attendedClassesInput.value);
+// 🔐 Paste your Hugging Face token here
+const HF_TOKEN = "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";
 
-    // Validation
-    if (!subject || isNaN(total) || isNaN(attended)) {
-        resultText.innerText = "Please fill all fields correctly.";
+const HF_API_URL = "https://api-inference.huggingface.co/models/facebook/bart-large-cnn";
+
+summarizeBtn.addEventListener("click", async () => {
+    const notes = notesInput.value.trim();
+
+    if (!notes) {
+        summaryText.innerText = "Please paste some notes first.";
         return;
     }
 
-    if (attended > total || total <= 0 || attended < 0) {
-        resultText.innerText = "Entered values are not valid.";
-        return;
-    }
+    summaryText.innerText = "⏳ Generating AI summary... Please wait.";
 
-    // Attendance percentage
-    const percentage = ((attended / total) * 100).toFixed(2);
+    try {
+        const response = await fetch(HF_API_URL, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${HF_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                inputs: notes,
+                parameters: {
+                    max_length: 150,
+                    min_length: 60
+                }
+            })
+        });
 
-    // Status logic
-    let status = "";
-    if (percentage >= 75) {
-        status = "✅ Safe";
-        resultText.innerText =
-            `Subject: ${subject}\n` +
-            `Attendance: ${percentage}%\n` +
-            `Status: ${status}\n\n` +
-            `Good job! Your attendance is above 75%.`;
-    } else if (percentage >= 65) {
-        status = "⚠️ Risk";
-        const needed = Math.ceil((0.75 * total - attended) / (1 - 0.75));
-        resultText.innerText =
-            `Subject: ${subject}\n` +
-            `Attendance: ${percentage}%\n` +
-            `Status: ${status}\n\n` +
-            `You should attend the next ${needed} classes to reach 75%.`;
-    } else {
-        status = "❌ Danger";
-        const needed = Math.ceil((0.75 * total - attended) / (1 - 0.75));
-        resultText.innerText =
-            `Subject: ${subject}\n` +
-            `Attendance: ${percentage}%\n` +
-            `Status: ${status}\n\n` +
-            `Immediate action needed! Attend the next ${needed} classes to reach 75%.`;
+        const data = await response.json();
+
+        if (data.error) {
+            summaryText.innerText = "⚠️ AI is busy. Try again in a moment.";
+            return;
+        }
+
+        summaryText.innerText = data[0].summary_text;
+
+    } catch (error) {
+        summaryText.innerText = "❌ Error connecting to AI.";
+        console.error(error);
     }
 });

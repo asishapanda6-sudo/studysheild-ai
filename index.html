@@ -2,29 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>StudyShield AI – Attendance Tracker</title>
+    <title>StudyShield AI – Notes Summarizer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <h1>Attendance Tracker</h1>
+        <h1>StudyShield AI</h1>
         <p class="subtitle">
-            Check your attendance status and know how many classes you need to attend.
+            Paste your notes below and get a short, exam-focused summary.
         </p>
 
-        <input type="text" id="subjectInput" placeholder="Subject name">
+        <textarea id="notesInput" placeholder="Paste your notes here..."></textarea>
 
-        <input type="number" id="totalClasses" placeholder="Total classes conducted">
-
-        <input type="number" id="attendedClasses" placeholder="Classes attended">
-
-        <button id="checkBtn">Check Attendance</button>
+        <button id="summarizeBtn">Summarize Notes</button>
 
         <div class="output">
-            <h3>Attendance Result</h3>
-            <p id="resultText">
-                Enter details and click the button to see your attendance.
+            <h3>Summary Output</h3>
+            <p id="summaryText">
+                Your summarized notes will appear here.
             </p>
         </div>
     </div>
