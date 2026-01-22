@@ -9,11 +9,18 @@ document.getElementById("summarizeBtn").addEventListener("click", () => {
 
   output.innerText = "Summarizing...";
 
-  // Simple intelligent summary logic
-  const sentences = text.split(".").map(s => s.trim()).filter(s => s);
-  const summary = sentences.slice(0, 4).map(s => "• " + s).join("\n");
+  // Simple smart summary (no server, no error)
+  const sentences = text
+    .split(".")
+    .map(s => s.trim())
+    .filter(s => s.length > 0);
+
+  const summary = sentences
+    .slice(0, 4)
+    .map(s => "• " + s)
+    .join("\n");
 
   setTimeout(() => {
-    output.innerText = summary || "Could not summarize.";
-  }, 600);
+    output.innerText = summary || "Could not generate summary.";
+  }, 500);
 });
