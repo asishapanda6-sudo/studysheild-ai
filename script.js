@@ -1,53 +1,33 @@
-export default {
-  async fetch(request, env) {
-    // Allow only POST
-    if (request.method !== "POST") {
-      return new Response("Method Not Allowed", { status: 405 });
-    }
+const WORKER_URL = "https://cold-math-dadb.asishapanda6.workers.dev";
 
-    try {
-      const body = await request.json();
-      const text = body.text;
+document.getElementById("summarizeBtn").addEventListener("click", async () => {
+  const notes = document.getElementById("notesInput").value.trim();
+  const output = document.getElementById("summaryText");
 
-      if (!text) {
-        return new Response(
-          JSON.stringify({ error: "No text provided" }),
-          { status: 400, headers: { "Content-Type": "application/json" } }
-        );
-      }
-
-      const hfResponse = await fetch(
-        "https://api-inference.huggingface.co/models/facebook/bart-large-cnn",
-        {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${env.HF_TOKEN}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            inputs: text,
-            parameters: {
-              max_length: 150,
-              min_length: 60
-            }
-          })
-        }
-      );
-
-      const result = await hfResponse.json();
-
-      return new Response(JSON.stringify(result), {
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
-        }
-      });
-
-    } catch (err) {
-      return new Response(
-        JSON.stringify({ error: "Worker error", details: err.message }),
-        { status: 500, headers: { "Content-Type": "application/json" } }
-      );
-    }
+  if (!notes) {
+    output.innerText = "⚠️ Please paste some notes first.";
+    return;
   }
-};
+
+  output.innerText = "⏳ Generating summary...";
+
+  try {
+    const response = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: notes })
+    });
+
+    const data = await response.json();
+
+    if (data.summary) {
+      output.innerText = data.summary;
+    } else {
+      output.innerText = "⚠️ AI error. Try again.";
+    }
+
+  } catch (error) {
+    output.innerText = "❌ Server error. Please try again later.";
+    console.error(error);
+  }
+});
