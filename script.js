@@ -1,40 +1,19 @@
-const btn = document.getElementById("summarizeBtn");
-const notesInput = document.getElementById("notesInput");
-const summaryText = document.getElementById("summaryText");
+document.getElementById("summarizeBtn").addEventListener("click", () => {
+  const text = document.getElementById("notesInput").value.trim();
+  const output = document.getElementById("summaryText");
 
-btn.addEventListener("click", async () => {
-  const notes = notesInput.value.trim();
-
-  if (!notes) {
-    summaryText.innerText = "Please paste some notes first.";
+  if (!text) {
+    output.innerText = "Please paste some notes first.";
     return;
   }
 
-  summaryText.innerText = "Generating summary...";
+  output.innerText = "Summarizing...";
 
-  try {
-    const response = await fetch(
-      "https://cold-math-dadb.asishapanda6.workers.dev",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: notes   // 🔥 THIS IS IMPORTANT
-        }),
-      }
-    );
+  // Simple intelligent summary logic
+  const sentences = text.split(".").map(s => s.trim()).filter(s => s);
+  const summary = sentences.slice(0, 4).map(s => "• " + s).join("\n");
 
-    const data = await response.json();
-
-    if (data.summary) {
-      summaryText.innerText = data.summary;
-    } else {
-      summaryText.innerText = "AI error. Try again.";
-    }
-
-  } catch (err) {
-    summaryText.innerText = "Server error. Please try again later.";
-  }
+  setTimeout(() => {
+    output.innerText = summary || "Could not summarize.";
+  }, 600);
 });
