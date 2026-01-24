@@ -1,25 +1,37 @@
-document.getElementById("summarizeBtn").addEventListener("click", async () => {
-  const text = document.getElementById("notesInput").value.trim();
-  const output = document.getElementById("summaryText");
+const button = document.getElementById("summarizeBtn");
+const notesInput = document.getElementById("notesInput");
+const summaryText = document.getElementById("summaryText");
 
-  if (!text) {
-    output.innerText = "Please paste some notes first.";
+button.addEventListener("click", async () => {
+  const notes = notesInput.value.trim();
+
+  if (!notes) {
+    summaryText.textContent = "⚠️ Please paste some notes first.";
     return;
   }
 
-  output.innerText = "AI is thinking...";
+  summaryText.textContent = "⏳ Generating AI summary...";
 
   try {
-    const res = await fetch("https://YOUR-WORKER-URL.workers.dev", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
-    });
+    const response = await fetch(
+      "https://cold-math-dadb.asishpanda6.workers.dev", // YOUR WORKER URL
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text: notes })
+      }
+    );
 
-    const data = await res.json();
-    output.innerText = data.summary || "AI failed to respond.";
+    const data = await response.json();
 
-  } catch (e) {
-    output.innerText = "Server error. Please try again.";
+    if (data.summary) {
+      summaryText.textContent = data.summary;
+    } else {
+      summaryText.textContent = "❌ AI failed to generate summary.";
+    }
+  } catch (error) {
+    summaryText.textContent = "❌ Server error. Please try again.";
   }
 });
