@@ -14,7 +14,7 @@ button.addEventListener("click", async () => {
 
   try {
     const response = await fetch(
-      "https://cold-math-dadb.asishpanda6.workers.dev", // YOUR WORKER URL
+      "https://cold-math-dadb.asishapanda6.workers.dev", // YOUR WORKER URL
       {
         method: "POST",
         headers: {
